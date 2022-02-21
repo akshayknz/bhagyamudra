@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import '../App.css';
 import styled, { css } from 'styled-components'
 import logo from '../logo.svg'
 import logo_short from '../logo_short.svg'
 import AppBar from '@mui/material/AppBar';
+import Popover from '@mui/material/Popover';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -23,9 +24,15 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import Paper from '@mui/material/Paper';
 import { ThemeProvider, createTheme } from '@mui/material/styles';  
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
+import Footer from './Footer';
 
-const pages = [{"Home":"/"}, {"Contact us":"/contact"}, {"Login":"/login"}];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 const Buttonss = styled.button`
   background: transparent;
   border-radius: 3px;
@@ -69,12 +76,20 @@ const theme = createTheme({
     },
   }
 });
-function App(props) {
-  
+function Navigation(props) {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [photoURL, setPhotoURL] = React.useState(null);
   const [value, setValue] = React.useState(0);
-
+  const { currentUser, settings, pages } = useAuth()
+  useEffect(() => {
+    if(currentUser?.photoURL){
+      setPhotoURL(currentUser.photoURL)
+    }else{
+      setPhotoURL(null)
+    }
+  }, [currentUser])
+  
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -98,7 +113,6 @@ function App(props) {
             <Typography
               variant="h6"
               noWrap
-              component="div"
               sx={{ mr: 2, display: { xs: 'none', md: 'flex' } }}
               component={Link} 
               to={'/'}
@@ -107,6 +121,17 @@ function App(props) {
             </Typography>
             <Box sx={{ flexGrow: 2, display: { xs: 'none', md: 'flex' }, justifyContent:'flex-end' }}>
               {pages.map((page, link) => (
+                <Button
+                  key={link}
+                  onClick={handleCloseNavMenu}
+                  sx={{ my: 2, color: 'white', display: 'block' }}
+                  component={Link} 
+                  to={page[Object.keys(page)[0]]}
+                >
+                  {Object.keys(page)[0]}
+                </Button>
+              ))}
+              {settings.map((page, link) => (
                 <Button
                   key={link}
                   onClick={handleCloseNavMenu}
@@ -159,39 +184,69 @@ function App(props) {
             <Typography
               variant="h6"
               noWrap
-              component="div"
+              component={Link}
+              to="/"
               sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
             >
               <img style={{height: "60px"}} src={logo_short} />
             </Typography>
             <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="Open settings">
+              <Tooltip title="Open user menu">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                  <Avatar alt="Remy Sharp" src={photoURL} />
                 </IconButton>
               </Tooltip>
-              <Menu
-                sx={{ mt: '45px' }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
+              <Popover
+                id={"menu-appbar"}
                 open={Boolean(anchorElUser)}
+                anchorEl={anchorElUser}
                 onClose={handleCloseUserMenu}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                }}
+                
               >
-                {settings.map((setting) => (
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">{setting}</Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
+                {currentUser? 
+                  <Box sx={{pt:3, ['@media (min-width:900px)']: { 
+                    pb:5
+                  }}}>
+                  <Box sx={{textAlign: 'center', px:3}}>
+                    <IconButton sx={{ mb:1 }}>
+                      <Avatar  sx={{ width: 86, height: 86 }} alt={currentUser.displayName} src={photoURL} />
+                    </IconButton>
+                    <Typography gutterBottom sx={{fontWeight:400}} variant='h6'>{currentUser.displayName}</Typography>
+                    <Box sx={{display:'flex', alignItems: 'center'}}>
+                        <Avatar sx={{ width: 24, height: 24, mr:1, p:.5, border:'1px solid rgba(0,0,0,.2)' }} src={'https://'+currentUser.providerData[0].providerId+'/favicon.ico'} />
+                      <Typography>{currentUser.email}</Typography>
+                    </Box>
+                  </Box>
+                    <List sx={{display: { xs: 'block', md: 'none' }}}>
+                    <Divider style={{width:'100%'}} />
+                      <ListItem disablePadding sx={{flexDirection:'column'}}>
+                        {settings.map((page, link) => (
+                          <ListItemButton sx={{width:'100%'}} key={link} onClick={handleCloseUserMenu} component={Link} to={page[Object.keys(page)[0]]}>
+                              <ListItemText  primary={<Typography textAlign="center">{Object.keys(page)[0]}</Typography>}  />
+                          </ListItemButton>
+                        ))}
+                      </ListItem>
+                    </List>
+                  </Box>
+                :
+                  <>
+                    <Typography sx={{ p: 2, px:3 }}>Login to your account.</Typography>
+                    <Divider style={{width:'100%'}} />
+                    <List>
+                      <ListItem disablePadding sx={{flexDirection:'column'}}>
+                        <ListItemButton sx={{width:'100%'}} onClick={handleCloseUserMenu} component={Link} to={'/login'}>
+                            <ListItemText  primary={<Typography textAlign="center">Login</Typography>}  />
+                        </ListItemButton>
+                      </ListItem>
+                    </List>
+                  </>
+                }                
+              </Popover>
+              
             </Box>
             {/* Mobile [end] */}
           </Toolbar>
@@ -212,8 +267,9 @@ function App(props) {
         </Paper>} */}
       
         {props.children}
+        <Footer />
     </ThemeProvider>
   );
 }
 
-export default App;
+export default Navigation;

@@ -51,9 +51,17 @@ function a11yProps(index) {
 const Login = () => {
     const [value, setValue] = React.useState(0);
     const [opacitylvl, setOpacitylvl] = React.useState(0);
+    const {currentUser} = useAuth()
+    const history = useNavigate();
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+    useEffect(() => {
+        if(currentUser != null){
+            history('/home')
+        }
+    }, [currentUser])
+    
     return (
         <Grid sx={{ flexGrow: 1, height: "55vh", alignItems: "center", mb:50, mt:1 }} container spacing={2}>
             <Grid item xs={12}>
@@ -99,7 +107,7 @@ const LoginComponent = () => {
         } catch {
           setError("Failed to create an account")
         }
-        setLoading(false)
+        // setLoading(false)
     }
     async function handleGoogleSubmit(e) {
         e.preventDefault()
@@ -111,7 +119,7 @@ const LoginComponent = () => {
         } catch {
           setError("Failed to create an account")
         }
-        setLoading(false)
+        // setLoading(false)
     }
     async function handleFacebookSubmit(e) {
         e.preventDefault()
@@ -124,7 +132,7 @@ const LoginComponent = () => {
             console.log(e);
           setError("Failed to create an account")
         }
-        setLoading(false)
+        // setLoading(false)
     }
     useEffect(() => {
       setOpacitylvl(1-opacitylvl)
@@ -151,7 +159,6 @@ const LoginComponent = () => {
             autoComplete="off"
         >
             <Typography variant="h3" sx={{textAlign: "left", px:1, pb:2}}>Login</Typography>
-            {JSON.stringify(currentUser)}
             <TextField inputRef={emailRef} fullWidth label="Email" variant="outlined" />
             <TextField inputRef={passwordRef} fullWidth label="Password" type="password" variant="outlined" />
             <Button type="submit" variant="contained">Login</Button>
@@ -173,7 +180,7 @@ const RegisterComponent = () => {
     const emailRef = useRef()
     const passwordRef = useRef()
     const passwordConfirmRef = useRef()
-    const { signup, currentUser } = useAuth()
+    const { signup, currentUser, loginWithGoogle, loginWithFacebook } = useAuth()
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
     const [opacitylvl, setOpacitylvl] = useState(0)
@@ -212,9 +219,33 @@ const RegisterComponent = () => {
             }
         //   setError()
         }
-        setLoading(false)
+        // setLoading(false)
     }
-
+    async function handleGoogleSubmit(e) {
+        e.preventDefault()
+        try {
+          setError("")
+          setLoading(true)
+          await loginWithGoogle()
+          history("/home")
+        } catch {
+          setError("Failed to create an account")
+        }
+        // setLoading(false)
+    }
+    async function handleFacebookSubmit(e) {
+        e.preventDefault()
+        try {
+          setError("")
+          setLoading(true)
+          await loginWithFacebook()
+          history("/home")
+        } catch(e) {
+            console.log(e);
+          setError("Failed to create an account")
+        }
+        // setLoading(false)
+    }
     useEffect(() => {
         setOpacitylvl(1-opacitylvl)
     }, [])
@@ -254,8 +285,8 @@ const RegisterComponent = () => {
                     my:3, mx:0
                 }
                 }}>
-            <Button variant="outlined" sx={{textTransform:"none"}} startIcon={<FaGoogle />}>Register with Google</Button>
-            <Button variant="outlined" sx={{textTransform:"none"}} startIcon={<FaFacebook />}>Register with Facebook</Button>
+            <Button onClick={handleGoogleSubmit} variant="outlined" sx={{textTransform:"none"}} startIcon={<FaGoogle />}>Register with Google</Button>
+            <Button onClick={handleFacebookSubmit} variant="outlined" sx={{textTransform:"none"}} startIcon={<FaFacebook />}>Register with Facebook</Button>
             </Stack>
         </Box>
     );

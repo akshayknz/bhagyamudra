@@ -13,17 +13,19 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import CardMedia from '@mui/material/CardMedia';
+import { useAuth } from '../contexts/AuthContext';
 
 const Hero = styled(Paper)(() => ({
     padding:'50px',
     height:'50vh'
   }));
 function Home() {
+  const { currentUser } = useAuth()
 
   const [sliderRef] = useKeenSlider(
     {
       loop: true,
-      mode: "free-snap",
+      mode: "free",
       slides: {
         origin: "center",
         perView: 1.5,
@@ -41,32 +43,20 @@ function Home() {
     [
       (slider) => {
         let timeout
-        let mouseOver = false
         function clearNextTimeout() {
           clearTimeout(timeout)
         }
         function nextTimeout() {
           clearTimeout(timeout)
-          if (mouseOver) return
           timeout = setTimeout(() => {
             slider.next()
-          }, 1000)
+          }, 2000)
         }
-        slider.on("created", () => {
-          slider.container.addEventListener("mouseover", () => {
-            mouseOver = true
-            clearNextTimeout()
-          })
-          slider.container.addEventListener("mouseout", () => {
-            mouseOver = false
-            nextTimeout()
-          })
-          nextTimeout()
-        })
+        slider.on("created", nextTimeout)
         slider.on("dragStarted", clearNextTimeout)
         slider.on("animationEnded", nextTimeout)
         slider.on("updated", nextTimeout)
-      },
+      }
     ]
   )
   const sliderInfo = [
@@ -87,6 +77,18 @@ function Home() {
       location: 'Thrissurrr',
       description: 'This is a short excerpt of the person.',
       image: 'https://images.everydayhealth.com/images/resilience/emotional-health/resilience/how-to-overcome-and-avoid-yo-yo-dieting-722x406.jpg'
+    },
+    {
+      name: 'Arun Shankar',
+      location: 'Thrissurrdr',
+      description: 'This is a short excerpt of the person.',
+      image: 'https://images.everydayhealth.com/images/resilience/emotional-health/resilience/how-to-overcome-and-avoid-yo-yo-dieting-722x406.jpg'
+    },
+    {
+      name: 'Arun Shankar',
+      location: 'Thrissursrr',
+      description: 'This is a short excerpt of the person.',
+      image: 'https://images.everydayhealth.com/images/resilience/emotional-health/resilience/how-to-overcome-and-avoid-yo-yo-dieting-722x406.jpg'
     }
   ];
     return (
@@ -97,9 +99,16 @@ function Home() {
                     <Typography variant="h3">Bhagyamudra</Typography>
                     <Typography sx={{py:3}}>LOrem Ipsum test is foinf to be the rgraredst and te most reaialvl and of.</Typography>
                     <Stack spacing={2} direction="row">
-                        <Button variant="contained">Add your profile</Button>
-                        <Button variant="outlined">Login</Button>
-                    </Stack>
+                        {currentUser? 
+                          <>
+                            <Button component={Link} size="large" to={'home/add'} variant="contained">Add your profile</Button>
+                          </>
+                          :<>
+                            <Button component={Link} size="large" to={'/login'} variant="contained">Add your profile</Button>
+                            <Button component={Link} size="large" to={'/login'} variant="outlined">Login</Button>
+                          </>
+                        }
+                        </Stack>
                 </Hero>
             </Grid>
             <Grid item xs={12} md={12} ref={sliderRef} sx={{py:4}} className="keen-slider">
@@ -135,25 +144,10 @@ function Home() {
               
             </Grid>
             <Grid item xs={12} md={6}>
-              <Paper elevation={10} sx={{
-                p: 32,
-                m: 3
-                }}>
-                
-              </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Paper sx={{
-                p: 32,
-                m: 3
-                }}>
-                
-              </Paper>
             </Grid>
         </Grid>
-        <nav>
-          <Link to="/about">About</Link>
-        </nav>
       </>
     );
   }
