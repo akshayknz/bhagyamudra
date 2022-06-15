@@ -22,7 +22,7 @@ import RestoreIcon from '@mui/icons-material/Restore';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import Paper from '@mui/material/Paper';
-import { ThemeProvider, createTheme } from '@mui/material/styles';  
+import { ThemeProvider, createTheme, responsiveFontSizes } from '@mui/material/styles';  
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import List from '@mui/material/List';
@@ -55,7 +55,7 @@ const BottomNavigationStyled = styled(BottomNavigation)`
   position: fixed;
   bottom:0;
 `;
-const theme = createTheme({
+let theme = createTheme({
   palette: {
      primary: {
         main: '#ff0000',
@@ -73,9 +73,13 @@ const theme = createTheme({
     },
     h1: {
       fontWeight: 100,
+      ['@media (max-width:400px)']: {
+        fontSize:'13vw'
+      }
     },
   }
 });
+theme = responsiveFontSizes(theme);
 function Navigation(props) {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -171,11 +175,11 @@ function Navigation(props) {
                 open={Boolean(anchorElNav)}
                 onClose={handleCloseNavMenu}
                 sx={{
-                  display: { xs: 'block', md: 'none' },
+                  display: { xs: 'block', md: 'none'}
                 }}
               >
                 {pages.map((page) => (
-                  <MenuItem key={page[Object.keys(page)[0]]} onClick={handleCloseNavMenu} component={Link} to={page[Object.keys(page)[0]]}>
+                  <MenuItem sx={{width: 180}} key={page[Object.keys(page)[0]]} onClick={handleCloseNavMenu} component={Link} to={page[Object.keys(page)[0]]}>
                     <Typography textAlign="center">{Object.keys(page)[0]}</Typography>
                   </MenuItem>
                 ))}
@@ -188,7 +192,7 @@ function Navigation(props) {
               to="/"
               sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
             >
-              <img style={{height: "60px"}} src={logo_short} />
+              <img style={{height: "60px", width:"60px"}} src={logo_short} />
             </Typography>
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open user menu">
@@ -205,7 +209,6 @@ function Navigation(props) {
                   vertical: 'bottom',
                   horizontal: 'left',
                 }}
-                
               >
                 {currentUser? 
                   <Box sx={{pt:3, ['@media (min-width:900px)']: { 
@@ -246,7 +249,6 @@ function Navigation(props) {
                   </>
                 }                
               </Popover>
-              
             </Box>
             {/* Mobile [end] */}
           </Toolbar>

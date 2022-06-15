@@ -36,6 +36,9 @@ const ListItemText1 = styled(ListItemText)`
     font-weight:100;
     font-weight: 100;
     text-decoration-color: rgba(255,255,255,0.35);
+    @media (max-width: 900px) {
+        padding-inline:0px;
+    }
 `;
 function Footer() {
   const { settings, pages } = useAuth()

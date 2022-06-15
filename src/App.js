@@ -1,37 +1,42 @@
-import React, {useState, useEffect} from 'react';
-import './App.css';
-import { AuthProvider } from './contexts/AuthContext';
-import { Routes, Route, Link,BrowserRouter as Router,
-  useHistory, Switch,
-  useLocation,Outlet,
-  useParams } from "react-router-dom";
-import ProtectedRoute from './components/ProtectedRoute';
-const Navigation = React.lazy(() => import("./components/Navigation"));
-const Contact = React.lazy(() => import("./pages/Contact"));
-const Home = React.lazy(() => import("./pages/Home"));
-const Add = React.lazy(() => import("./components/Add"));
-const Login = React.lazy(() => import("./components/Login"));
-const Dashboard = React.lazy(() => import("./pages/Dashboard"));
-const Logout = React.lazy(() => import("./components/Logout"));
+import React from 'react'
+import './App.css'
+import { AuthProvider } from './contexts/AuthContext'
+import Provider, { Context } from './contexts/GlobalContext'
+import { Routes, Route, useLocation } from "react-router-dom"
+import ProtectedRoute from './components/ProtectedRoute'
+import Home from './pages/Home'
+import Navigation from './components/Navigation'
+import { ThemeProvider, createTheme, responsiveFontSizes } from '@mui/material/styles';
+const ScrollToTopOnMount = React.lazy(() => import("./components/ScrollToTopOnMount"))
+const Contact = React.lazy(() => import("./pages/Contact"))
+const Login = React.lazy(() => import("./components/Login"))
+const Logout = React.lazy(() => import("./components/Logout"))
+const Dashboard = React.lazy(() => import("./pages/Dashboard"))
+const Add = React.lazy(() => import("./components/Add"))
+const Delete = React.lazy(() => import("./components/Delete"))
+const MyAccount = React.lazy(() => import("./pages/MyAccount"))
 
 function App() {
   const location = useLocation();
   return (
     <AuthProvider>
-      <React.Suspense fallback={<>Loading...</>}>
+      <Provider>
         <Navigation >
-          <ScrollToTop />
         <Routes>
           <Route path="/" 
             element={
+            <>
             <React.Suspense fallback={<>...</>}>
-              <Home />
+              <ScrollToTopOnMount />
             </React.Suspense>
+              <Home />
+            </>
             } 
           />
           <Route path="contact" 
             element={
             <React.Suspense fallback={<>...</>}>
+              <ScrollToTopOnMount />
               <Contact />
             </React.Suspense>
             } 
@@ -39,6 +44,7 @@ function App() {
           <Route path="login" 
             element={
             <React.Suspense fallback={<>...</>}>
+              <ScrollToTopOnMount />
               <Login />
             </React.Suspense>
             } 
@@ -46,15 +52,28 @@ function App() {
           <Route exact path='/home' element={<ProtectedRoute/>}>
             <Route path='/home' element={
               <React.Suspense fallback={<>...</>}>
+                  <ScrollToTopOnMount />
                   <Dashboard />
                 </React.Suspense>
             }>
-                <Route path='add' element={
+                <Route path='profile/:action' element={
                   <React.Suspense fallback={<></>}>
                     <Add />
                   </React.Suspense>
-                }/>
+                }>
+                  <Route path=':id' element={
+                  <React.Suspense fallback={<></>}>
+                    <Add />
+                  </React.Suspense>
+                  }>
+                  </Route>
                 </Route>
+                <Route path='profile/delete/:id' element={
+                  <React.Suspense fallback={<></>}>
+                    <Delete />
+                  </React.Suspense>
+                }></Route>
+              </Route>
             </Route>
           <Route exact path='/logout' element={<ProtectedRoute/>}>
               <Route exact path='/logout' element={
@@ -63,26 +82,19 @@ function App() {
                 </React.Suspense>
               }/>
           </Route>
+          <Route exact path='/account' element={<ProtectedRoute/>}>
+              <Route exact path='/account' element={
+                <React.Suspense fallback={<>...</>}>
+                  <ScrollToTopOnMount />
+                  <MyAccount />
+                </React.Suspense>
+              }/>
+          </Route>
         </Routes>
         </Navigation>
-      </React.Suspense>
-    
+      </Provider>
     </AuthProvider>
   );
 }
 
-export default App;
-
-export function ScrollToTop() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
-    });
-  }, [pathname]);
-
-  return null;
-}
+export default App
